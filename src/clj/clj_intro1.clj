@@ -19,6 +19,8 @@
 
 
 ; 4. Code as Data
+;   - fn as data
+;   - talk about macro, maybe a little code
 
 
 
@@ -33,3 +35,24 @@
 
 
 ; sidebar - efficiency, show pic of node tree for clj list impl
+
+
+
+; 7. high-order functions - map/reduce/filter
+
+
+
+
+; 8. threading macros
+
+
+
+
+; 9. concurrency
+
+;   - change map to pmap
+;   - future/promise
+;   - core.async
+;    - go block
+;    - channel
+
