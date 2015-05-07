@@ -174,6 +174,18 @@ my-snapshot
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 8. threading macros ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
+; thread first
+(-> {}
+    (assoc :foo "bar")
+    (assoc :fuz "baz")
+    keys
+    count)
+
+; thread last
+(->> (range 100)
+     (filter even?)
+     (map doublify)
+     (reduce +))
 
 
 
@@ -215,10 +227,11 @@ my-snapshot
 
 
 
+
 ;;;;;;;;;;;;;;;;;;;;
 ;; 10. core.async ;;
 ;;;;;;;;;;;;;;;;;;;;
-(use 'clojure.core.async)
+(require ['clojure.core.async :as 'async :refer '[go go-loop chan close! timeout <! <!! >! >!!]])
 
 (<!!
  (go
@@ -232,7 +245,7 @@ my-snapshot
  [n 10]
  (if (> n 0)
    (do
-     (<! (timeout 1000))
+     (<! (timeout 2000))
      (>! channel n)
      (recur (dec n)))
    (close! channel)))
@@ -247,25 +260,52 @@ my-snapshot
 
 
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; 10. namespaces and general organization ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-
-
-
-
-
-
-
-
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; 11. just the good bits from OOP ;;
+;; 10. just the good bits from OOP ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;   - multi-method
+; multi-arity
+(defn greeting
+  ([] (greeting "Stranger" 1))
+  ([name] (greeting name 1))
+  ([name times]
+   (clojure.string/join ", " (repeat times (str "Hello " name)))))
+(greeting)
+(greeting "Sue")
+(greeting "Sue" 4)
+
+; multi-method
+(defmulti silly-math (fn [x]
+                       (cond
+                        (odd? x) :odd
+                        (> x 10) :big
+                        (even? x) :small-even)))
+(defmethod silly-math :odd [x] (inc x))
+(defmethod silly-math :big [x] (* x x))
+(defmethod silly-math :small-even [x] (+ (* 2 x) 3))
+(silly-math 8)
+(silly-math 17)
+(silly-math 22)
+
 ;   - protocols (show power by adding a method to String)
 ;   - defrecord
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 11. namespaces and general organization ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; todo: show real program in another file
+
