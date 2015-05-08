@@ -1,16 +1,29 @@
 (use 'mikera.image.core)
 (-> (load-image-resource "logo.png")
     show
-    (.setAlwaysOnTop true)); Pre
-; 1. I've been working with clojure for a few years on small/medium size projects
-; 2. I'll draw a lot of comparisons with Java, but I don't mean to put it down
-; 3. "Clojure asks you to step up your game, and rewards you for doing so" - Stuart Halloway
-; 4. I struggled a bit with the flow of this material. There are several concepts that all fit together to form the whole, but there is no clear sequence.
+    (.setAlwaysOnTop true))
+
+
+
+
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;
 ;; 1. Live coding ;;
 ;;;;;;;;;;;;;;;;;;;;
 (+ 1 1)
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -28,7 +41,17 @@
 (get (System/getProperties) "java.version")
 (new java.util.Date)
 
-(org.apache.commons.math3.util.ArithmeticUtils/addAndCheck 1 1)
+(org.apache.commons.math3.util.ArithmeticUtils/addAndCheck 2 1)
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -49,6 +72,12 @@
 ; set
 #{:a :b :c}
 
+; seq
+'(1 2 3)
+
+
+
+
 
 
 
@@ -60,31 +89,54 @@
 ;;;;;;;;;;;;;;;;;;;;;
 ;; 4. Code as Data ;;
 ;;;;;;;;;;;;;;;;;;;;;
-(def my-add-fn (fn [x y] (+ x y)))
+(fn [x] (* x x))
 
-(my-add-fn 1 2)
+(def sqr (fn [x] (* x x)))
 
-((identity my-add-fn) 1 1)
+(sqr 4)
+
+((identity sqr) 2)
+
+
 
 
 ; eval
+'(+ 1 1)
 (eval '(+ 1 1))
 
+(read-string "(+ 1 1)")
+(eval (read-string "(+ 1 1)"))
+
+
+
+
+
+
 ; macros
+
+; (+ 1 1) -> (1 1 +)
 (defmacro postfix-notation [expression]
-  expression
   (conj (butlast expression) (last expression)))
+
+(macroexpand '(postfix-notation (1 2 +)))
 
 (postfix-notation
  (1 2 +))
 
-(macroexpand '(postfix-notation
-               (1 2 +)))
+(macroexpand
+ '(with-open [in-stream (clojure.java.io/input-stream "resources/textfile.txt")]
+    (.available in-stream)))
 
-(with-open [in-stream (clojure.java.io/input-stream "resources/textfile.txt")]
-  (.available in-stream))
 
-(println "holy shit") ; todo: maybe picture of exploding head here
+
+
+
+
+
+
+
+
+(println "holy shit")
 
 
 
@@ -124,7 +176,7 @@ list-c
 ;; 6. atoms (cas) ;;
 ;;;;;;;;;;;;;;;;;;;;
 (def list-atom (atom [1 2 3 4 5 6]))
-@list-atom
+list-atom
 
 (swap! list-atom rest)
 @list-atom
@@ -134,6 +186,14 @@ my-snapshot
 (-> (load-image-resource "epochal-time-model.png")
     show
     (.setAlwaysOnTop true))
+
+
+
+
+
+
+
+
 
 ; refs (stm)
 (def my-account (ref 100))
@@ -159,13 +219,24 @@ my-snapshot
 ;; 7. high-order functions ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def coll (range 10))
-(defn doublify [x] (* 2 x))
-
-(map doublify coll)
 
 (filter even? coll)
 
+(defn doublify [x] (* 2 x))
+(map doublify coll)
+
 (reduce + (range 10))
+
+(group-by
+ count
+ ["a" "as" "asd" "aa" "asdf" "qwer"])
+
+
+
+
+
+
+
 
 
 
@@ -206,12 +277,25 @@ my-snapshot
 ; pmap
 (pmap stupid-doublify (range 50))
 
+
+
+
+
+
+
+
+
 ; future
 (def thing (atom nil))
 (future
   (Thread/sleep 5000)
   (reset! thing :foo))
 @thing
+
+
+
+
+
 
 ; promise
 (def promise-thing (promise))
@@ -231,7 +315,8 @@ my-snapshot
 ;;;;;;;;;;;;;;;;;;;;
 ;; 10. core.async ;;
 ;;;;;;;;;;;;;;;;;;;;
-(require ['clojure.core.async :as 'async :refer '[go go-loop chan close! timeout <! <!! >! >!!]])
+(require ['clojure.core.async :as 'async
+          :refer '[go go-loop chan close! timeout <! <!! >! >!!]])
 
 (<!!
  (go
@@ -273,6 +358,14 @@ my-snapshot
 (greeting "Sue")
 (greeting "Sue" 4)
 
+
+
+
+
+
+
+
+
 ; multi-method
 (defmulti silly-math (fn [x]
                        (cond
@@ -306,6 +399,5 @@ my-snapshot
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 11. namespaces and general organization ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-; todo: show real program in another file
+; show real program in another file
 
