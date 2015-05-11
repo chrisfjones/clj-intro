@@ -13,8 +13,9 @@
 ;;;;;;;;;;;;;;;;;;;;
 ;; 1. Live coding ;;
 ;;;;;;;;;;;;;;;;;;;;
-(+ 1 1)
+(* (+ 2 3) 3)
 
+(+ 1 1 3 4)
 
 
 
@@ -39,10 +40,12 @@
 ;;;;;;;;;;;;;;;;;;;;;
 (System/currentTimeMillis)
 (get (System/getProperties) "java.version")
+
+(filter (fn [k] (.startsWith k "java")) (keys (System/getProperties)))
+
 (new java.util.Date)
 
-(org.apache.commons.math3.util.ArithmeticUtils/addAndCheck 2 1)
-
+(org.apache.commons.math3.util.ArithmeticUtils/addAndCheck Long/MAX_VALUE 1)
 
 
 
@@ -64,7 +67,7 @@
 ;;;;;;;;;;;;;;;;;;;;;
 
 ; vector
-[1 2 3]
+[1 2 3 5]
 
 ; map
 {:key1 "foo" :key2 "bar"}
@@ -90,12 +93,18 @@
 ;; 4. Code as Data ;;
 ;;;;;;;;;;;;;;;;;;;;;
 (fn [x] (* x x))
+((fn [x] (* x x)) 4)
+
 
 (def sqr (fn [x] (* x x)))
+(defn sqr [x] (* x x))
 
-(sqr 4)
+(sqr 5)
 
 ((identity sqr) 2)
+
+
+
 
 
 
@@ -127,16 +136,27 @@
  '(with-open [in-stream (clojure.java.io/input-stream "resources/textfile.txt")]
     (.available in-stream)))
 
+(with-open [in-stream (clojure.java.io/input-stream "resources/textfile.txt")]
+    (.available in-stream))
+
+
+(if (= 1 2)
+  :blue
+  :red)
+
+
+(loop [n 11]
+  (when (not (= 0 n))
+    (println "hey")
+    (Thread/sleep 200)
+    (recur (dec n))))
+(dotimes [n 10] (println "hey"))
 
 
 
 
 
 
-
-
-
-(println "holy shit")
 
 
 
@@ -177,6 +197,7 @@ list-c
 ;;;;;;;;;;;;;;;;;;;;
 (def list-atom (atom [1 2 3 4 5 6]))
 list-atom
+@list-atom
 
 (swap! list-atom rest)
 @list-atom
@@ -219,6 +240,8 @@ my-snapshot
 ;; 7. high-order functions ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def coll (range 10))
+
+coll
 
 (filter even? coll)
 
@@ -303,6 +326,7 @@ my-snapshot
   (Thread/sleep 5000)
   (deliver promise-thing :bar))
 
+@promise-thing
 
 
 
@@ -316,7 +340,7 @@ my-snapshot
 ;; 10. core.async ;;
 ;;;;;;;;;;;;;;;;;;;;
 (require ['clojure.core.async :as 'async
-          :refer '[go go-loop chan close! timeout <! <!! >! >!!]])
+          :refer '[go go-loop chan close! timeout alts! put! <! <!! >! >!!]])
 
 (<!!
  (go
@@ -338,7 +362,13 @@ my-snapshot
 (<!! channel)
 
 
-
+(let [c1 (chan)
+      c2 (chan)]
+  (go (while true
+        (let [[v ch] (alts! [c1 c2])]
+          (println "Read" v "from" ch))))
+  (put! c1 "hi")
+  (put! c2 "there"))
 
 
 
@@ -360,7 +390,7 @@ my-snapshot
 
 
 
-
+(macroexpand '(go (println "hey")))
 
 
 
@@ -379,8 +409,6 @@ my-snapshot
 (silly-math 17)
 (silly-math 22)
 
-;   - protocols (show power by adding a method to String)
-;   - defrecord
 
 
 
@@ -388,6 +416,42 @@ my-snapshot
 
 
 
+; protocols
+(defprotocol Shape
+  (area [s])
+  (perimiter [s]))
+
+(defrecord Rectangle [w h]
+  Shape
+  (area [this] (* w h))
+  (perimiter [this] (+ (* 2 w)
+                       (* 2 h))))
+
+(defrecord Circle [r]
+  Shape
+  (area [this] (* Math/PI r r))
+  (perimiter [this] (* 2 Math/PI r)))
+
+(def rect1 (->Rectangle 10 12))
+(def circ1 (->Circle 6))
+
+(area rect1)
+(perimiter rect1)
+
+(area circ1)
+(perimiter circ1)
+
+
+
+
+
+
+(use 'clojure.string)
+
+(extend java.lang.String
+  Shape
+  {:area (fn [this]
+           )})
 
 
 
@@ -399,5 +463,4 @@ my-snapshot
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 11. namespaces and general organization ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; show real program in another file
 
